@@ -1,0 +1,11 @@
+{
+  "name": "zipcode",
+  "version": "1.0.0",
+  "description": "given a zipcode, fetches and displays information about that zipcode",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mohsenil85@gmail.com",
+  "license": "ISC"
+}
