@@ -1,7 +1,7 @@
 function validateArgs() {
     const validZipRegex = /^\d{5}(?:-\d{4})?$/;
     //a valid zipcode looks like "82801" or "82801-2202"
-    //(ie, no need to worry about the case of "82801 2202")
+    //(ie, no need to worry about the case of "82801 2202" and consequent argv[3])
     if (!process.argv[2]) {
         console.log("Error:  Please provide a zipcode");
         return false;
