@@ -1,29 +1,28 @@
-"use strict";
+'use strict';
 
-const request = require("request");
-const sprintf = require("sprintf-js").sprintf;
+const request = require('request');
+const sprintf = require('sprintf-js').sprintf;
 
-const openWeatherApiKey = "94ea6a76e3743679b7b79642d332af22";
-const openWeatherApiUrl = "http://api.openweathermap.org/data/2.5/weather";
+const openWeatherApiKey = '94ea6a76e3743679b7b79642d332af22';
+const openWeatherApiUrl = 'http://api.openweathermap.org/data/2.5/weather';
 
-const googleMapsApiKey = "AIzaSyCXPMOnpBe_YPH2L1PcFvHVXK6Z7q0xkz4";
-const timezoneUrl = "https://maps.googleapis.com/maps/api/timezone/json";
-const elevationUrl = "https://maps.googleapis.com/maps/api/elevation/json";
+const googleMapsApiKey = 'AIzaSyCXPMOnpBe_YPH2L1PcFvHVXK6Z7q0xkz4';
+const timezoneUrl = 'https://maps.googleapis.com/maps/api/timezone/json';
+const elevationUrl = 'https://maps.googleapis.com/maps/api/elevation/json';
 
 function fetchWeatherData(zipCode) {
     const openWeatherOptions = {
         uri: openWeatherApiUrl,
         qs: {
             APPID: openWeatherApiKey,
-            units: "imperial",
-            zip: zipCode + ",us"
+            units: 'imperial',
+            zip: zipCode + ',us'
         },
         json: true
     };
     return new Promise((resolve, reject) => {
         request(openWeatherOptions, (error, response, body) => {
             if (error) return reject(error);
-            console.log(body);
             resolve([body.name, body.main.temp, body.coord.lat, body.coord.lon]);
         })
     });
@@ -35,7 +34,7 @@ function fetchTimezoneData(lat, lon) {
         qs: {
             key: googleMapsApiKey,
             timestamp: Date.now(),
-            location: '' + lat + ',' + lon
+            locations: '' + lat + ',' + lon
         },
     };
     return new Promise((resolve, reject) => {
@@ -52,12 +51,13 @@ function fetchElevationData(lat, lon) {
         qs: {
             key: googleMapsApiKey,
             timestamp: Date.now(),
-            location: '' + lat + ',' + lon
+            locations: '' + lat + ',' + lon
         },
     };
     return new Promise((resolve, reject) => {
         request(elevationOptions, (error, response, body) => {
             if (error) return reject(error);
+            console.log(body);
             resolve(body.results[0].elevation);
         })
     });
@@ -65,13 +65,13 @@ function fetchElevationData(lat, lon) {
 
 function validateArgs() {
     const validZipRegex = /^\d{5}(?:-\d{4})?$/;
-    //a valid zipcode looks like "82801" or "82801-2202"
-    //(ie, no need to worry about the case of "82801 2202" and consequent argv[3])
+    //a valid zipcode looks like '82801' or '82801-2202'
+    //(ie, no need to worry about the case of '82801 2202' and consequent argv[3])
     if (!process.argv[2]) {
-        console.log("Error:  Please provide a zipcode");
+        console.log('Error:  Please provide a zipcode');
         return false;
     } else if (!validZipRegex.test(process.argv[2])) {
-        console.log("Error:  Please provide a valid zipcode");
+        console.log('Error:  Please provide a valid zipcode');
         return false;
     } else {
         return true;
@@ -79,11 +79,11 @@ function validateArgs() {
 }
 
 function reportData(name, temp, timezome, elevation) {
-    const reportFormat = "At the location %s, the temperature is %s, the timezone is %s, and the elevation is %s.";
+    const reportFormat = 'At the location %s, the temperature is %s, the timezone is %s, and the elevation is %s.';
     return sprintf(reportFormat, name, temp, timezome, elevation);
 }
 
-const main = async function () {
+async function main() {
     if (validateArgs()) {
         let zipCode = process.argv[2];
         let [name, temp, lat, lon] = await fetchWeatherData(zipCode);
@@ -97,8 +97,8 @@ const main = async function () {
         process.exit(1);
     }
 
-};
+}
 
 if (require.main === module) {
-    main();
+    main().catch(reason => console.log(reason));
 }
