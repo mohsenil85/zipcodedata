@@ -23,8 +23,8 @@ function fetchWeatherData(zipCode) {
     return new Promise((resolve, reject) => {
         request(openWeatherOptions, (error, response, body) => {
             if (error) return reject(error);
-            //return 4 pieces of info:  name, temp, and the lat and long, which we need for the
-            //subsequent api hits
+            //return 4 pieces of info:  name, temp, and the lat and long,
+            // which we need for the subsequent api hits
             resolve([body.name, body.main.temp, body.coord.lat, body.coord.lon]);
         })
     });
@@ -35,7 +35,7 @@ function fetchTimezoneData(lat, lon) {
         uri: timezoneUrl,
         qs: {
             location: '' + lat + ',' + lon,
-            timestamp: Math.floor(Date.now() / 1000),//this is in seconds, not millis!
+            timestamp: Math.floor(Date.now() / 1000),//this is inseconds, not millis!
             key: googleMapsApiKey,
         },
         json: true,
@@ -82,28 +82,26 @@ function validateArgs() {
 }
 
 function reportData(name, temp, timezome, elevation) {
+    //print the formatted string to stdout
     const reportFormat = 'At the location %s, the temperature is %s, the timezone is %s, and the elevation is %s.';
-    return sprintf(reportFormat, name, temp, timezome, elevation);
+    const formattedData = sprintf(reportFormat, name, temp, timezome, elevation);
+    console.log(formattedData);
 }
 
 async function main() {
     if (validateArgs()) {
-        let zipCode = process.argv[2];
-        let [name, temp, lat, lon] = await fetchWeatherData(zipCode);
-        let timezone = await fetchTimezoneData(lat, lon);
-        let elevation = await fetchElevationData(lat, lon);
-        const result = reportData(name, temp, timezone, elevation);
-        console.log(result);
-        process.exit(0);//be good unix citizens and explicitly report our success
-    } else {
-        //if we had trouble parsing argv, let's bail
-        process.exit(1);
+        const zipCode = process.argv[2];
+        //retrieve the name, temp, and lat & long which we need for the google apis
+        const [name, temp, lat, lon] = await fetchWeatherData(zipCode);
+        //now that we have lat and long, we can hit the next api's
+        const timezone = await fetchTimezoneData(lat, lon);
+        const elevation = await fetchElevationData(lat, lon);
+        //now we have the four required info, so we will put them into the report function
+        reportData(name, temp, timezone, elevation);
     }
-
 }
 
 if (require.main === module) {
-    main().catch(reason => console.log(reason));
-    // fetchTimezoneData("39.60", "-119.68");
-
+    main()
+        .catch(reason => console.log(reason));
 }
