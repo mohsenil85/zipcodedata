@@ -26,7 +26,7 @@ function fetchWeatherData(zipCode) {
             //return 4 pieces of info:  name, temp, and the lat and long,
             // which we need for the subsequent api hits
             resolve([body.name, body.main.temp, body.coord.lat, body.coord.lon]);
-        })
+        });
     });
 }
 
@@ -34,17 +34,17 @@ function fetchTimezoneData(lat, lon) {
     const timezoneOptions = {
         uri: timezoneUrl,
         qs: {
-            location: '' + lat + ',' + lon,
+            location: lat + ',' + lon,
             timestamp: Math.floor(Date.now() / 1000),//this is inseconds, not millis!
             key: googleMapsApiKey,
         },
-        json: true,
+        json: true
     };
     return new Promise((resolve, reject) => {
         request(timezoneOptions, (error, response, body) => {
             if (error) return reject(error);
             resolve(body.timeZoneId);
-        })
+        });
     });
 }
 
@@ -54,7 +54,7 @@ function fetchElevationData(lat, lon) {
         qs: {
             key: googleMapsApiKey,
             timestamp: Date.now(),
-            locations: '' + lat + ',' + lon
+            locations: lat + ',' + lon
         },
         json: true
     };
@@ -62,7 +62,7 @@ function fetchElevationData(lat, lon) {
         request(elevationOptions, (error, response, body) => {
             if (error) return reject(error);
             resolve(body.results[0].elevation);
-        })
+        });
     });
 }
 
@@ -90,12 +90,16 @@ function reportData(name, temp, timezome, elevation) {
 
 async function main() {
     if (validateArgs()) {
+
         const zipCode = process.argv[2];
+
         //retrieve the name, temp, and lat & long which we need for the google apis
         const [name, temp, lat, lon] = await fetchWeatherData(zipCode);
+
         //now that we have lat and long, we can hit the next api's
         const timezone = await fetchTimezoneData(lat, lon);
         const elevation = await fetchElevationData(lat, lon);
+
         //now we have the four required info, so we will put them into the report function
         reportData(name, temp, timezone, elevation);
     }
