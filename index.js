@@ -23,6 +23,8 @@ function fetchWeatherData(zipCode) {
     return new Promise((resolve, reject) => {
         request(openWeatherOptions, (error, response, body) => {
             if (error) return reject(error);
+            //return 4 pieces of info:  name, temp, and the lat and long, which we need for the
+            //subsequent api hits
             resolve([body.name, body.main.temp, body.coord.lat, body.coord.lon]);
         })
     });
@@ -32,10 +34,11 @@ function fetchTimezoneData(lat, lon) {
     const timezoneOptions = {
         uri: timezoneUrl,
         qs: {
+            location: '' + lat + ',' + lon,
+            timestamp: Math.floor(Date.now() / 1000),//this is in seconds, not millis!
             key: googleMapsApiKey,
-            timestamp: Date.now(),
-            locations: '' + lat + ',' + lon
         },
+        json: true,
     };
     return new Promise((resolve, reject) => {
         request(timezoneOptions, (error, response, body) => {
@@ -53,11 +56,11 @@ function fetchElevationData(lat, lon) {
             timestamp: Date.now(),
             locations: '' + lat + ',' + lon
         },
+        json: true
     };
     return new Promise((resolve, reject) => {
         request(elevationOptions, (error, response, body) => {
             if (error) return reject(error);
-            console.log(body);
             resolve(body.results[0].elevation);
         })
     });
@@ -101,4 +104,6 @@ async function main() {
 
 if (require.main === module) {
     main().catch(reason => console.log(reason));
+    // fetchTimezoneData("39.60", "-119.68");
+
 }
